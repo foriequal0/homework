@@ -53,3 +53,15 @@ loadData = do
   case eitherMarket of
     Left err -> fail err
     Right a -> return a
+
+data OrdList a = OrdList { getOrdList :: [a] }
+                 deriving (Eq, Show)
+
+instance Ord a => Monoid (OrdList a) where
+    mempty = OrdList []
+    (OrdList lhs) `mappend` (OrdList rhs) = OrdList $ appendInOrder lhs rhs
+       where appendInOrder [] r = r
+             appendInOrder l [] = l
+             appendInOrder l@(x:xs) r@(y:ys)
+                 | x <= y = x : (xs `appendInOrder`r)
+                 | otherwise = y : (l `appendInOrder` ys)
