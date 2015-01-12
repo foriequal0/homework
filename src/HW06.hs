@@ -17,6 +17,7 @@ ynToBool (String s) =
     case T.toLower(s) of
       "y" -> Bool True
       "n" -> Bool False
+      _   -> String s
 ynToBool (Object o) = Object $ fmap ynToBool o
 ynToBool (Array a) = Array $ fmap ynToBool a
 ynToBool v = v
