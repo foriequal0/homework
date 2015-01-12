@@ -34,3 +34,5 @@ main = hspec $ do
   describe "squashMulId" $ do
     it "can squash MulId" $ do
       squashMulId (Mul (Lit (1 :: Integer)) (Lit 2)) `shouldBe` (Lit 2)
+    it "can squash two depth tree" $ do
+      squashMulId (Mul (Mul (Lit (1 :: Integer)) (Lit 1)) (Lit 3)) `shouldBe` (Lit 3)
