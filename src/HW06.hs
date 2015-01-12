@@ -22,4 +22,7 @@ ynToBool (Object o) = Object $ fmap ynToBool o
 ynToBool (Array a) = Array $ fmap ynToBool a
 ynToBool v = v
 
+parseData :: B.ByteString -> Either String Value
+parseData = fmap ynToBool . eitherDecode
+
 
