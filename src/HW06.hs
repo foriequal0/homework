@@ -30,7 +30,7 @@ data Market = Market { marketname :: T.Text,
                        x          :: Float,
                        y          :: Float,
                        state      :: T.Text}
-            deriving (Show, Generic)
+            deriving (Show, Generic, Eq)
 
 instance FromJSON Market
 
@@ -48,11 +48,11 @@ parseMarkets s = do
 
 loadData :: IO [Market]
 loadData = do
-  filedata <- B.readFile "markets.json"
+  filedata <- B.readFile "src/markets.json"
   let eitherMarket = parseMarkets(filedata)
   case eitherMarket of
     Left err -> fail err
-    Right a -> return a
+    Right a-> return a
 
 data OrdList a = OrdList { getOrdList :: [a] }
                  deriving (Eq, Show)
@@ -72,19 +72,25 @@ search :: Monoid m => (Market -> m) -> Searcher m
 search mkMonoid str mkt = 
     mconcat $ map mkMonoid $ filter (T.isInfixOf str . marketname) $ mkt
 
-safeHead :: [a] -> Maybe a
-safehead [] = Nothing
-safeHead (x:_) = Just x
+compose2 :: (c->d) -> (a -> b -> c) -> a -> b -> d
+compose2 = (.) . (.) 
 
 firstFound :: Searcher (Maybe Market)
-firstFound = safeHead . search (:[])
+firstFound = getFirst `compose2` search (First . Just)
 
 lastFound :: Searcher (Maybe Market)
-lastFound = safeHead . reverse . search (:[])
+lastFound =  getLast `compose2` search (Last . Just)
 
 allFound :: Searcher [Market]
 allFound = search (:[])
 
 numberFound :: Searcher Int
-numberFound = length . allFound
+numberFound = length `compose2` allFound
 
+newtype MktYOrd = MktYOrd { getMarket :: Market } deriving(Eq)
+
+instance Ord MktYOrd where
+    a `compare` b = (y . getMarket $ a) `compare` (y . getMarket $ b)
+
+orderedNtoS :: Searcher [Market]
+orderedNtoS =  reverse `compose2` ((map getMarket) `compose2`( getOrdList `compose2` search (OrdList . (:[]) . MktYOrd)))
