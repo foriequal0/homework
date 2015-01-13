@@ -1,14 +1,15 @@
-{-# LANGUAGE DeriveGeneric, OverloadedStrings, StandaloneDeriving #-}
+{-# LANGUAGE DeriveGeneric, OverloadedStrings #-}
 
 import Test.Hspec
 import Data.Aeson
 -- import Test.QuickCheck
 import Control.Exception (evaluate)
 import Data.Monoid
+import Data.List
 
 import HW06
 
-deriving instance Eq Market
+--deriving instance Eq Market
 
 main :: IO()
 main = hspec $ do
@@ -49,7 +50,7 @@ main = hspec $ do
 
   describe "search" $ do
     it "should search success simple input" $ do
-      let ioMarkets = loadData
+      ioMarkets <- loadData
       let listMaker = (:[])
       let searcher = search listMaker "Farmers"
-      fmap searcher ioMarkets `shouldReturn` [Market {marketname = "\"Y Not Wednesday Farmers Market at Town Center\"", x = -76.13536, y = 36.841885, state = "Virginia"},Market {marketname = "10:10 Farmers Market", x = -84.7689, y = 33.7196, state = "Georgia"}]
+      searcher ioMarkets `shouldSatisfy` (isPrefixOf [Market {marketname = "\"Y Not Wednesday Farmers Market at Town Center\"", x = -76.13536, y = 36.841885, state = "Virginia"},Market {marketname = "10:10 Farmers Market", x = -84.7689, y = 33.7196, state = "Georgia"}])
