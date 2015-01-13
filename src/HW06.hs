@@ -41,7 +41,7 @@ fromResult (Success a) = Right a
 parseMarkets :: B.ByteString -> Either String [Market]
 parseMarkets s = do
   parsedValue <- parseData s
-  let result = fromJSON(parsedValue)
+  let result = fromJSON parsedValue :: Result [Market]
   case result of
     Error err -> fail err
     Success a -> return a

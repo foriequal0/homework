@@ -4,6 +4,7 @@ import Test.Hspec
 import Data.Aeson
 -- import Test.QuickCheck
 import Control.Exception (evaluate)
+import Data.Monoid
 
 import HW06
 
@@ -38,3 +39,7 @@ main = hspec $ do
       parseMarkets "[{\"marketname\":\"market-name\", \"x\":1.234, \"y\":3.456, \"state\":\"market-state\"}]" `shouldBe` Right ([Market "market-name" 1.234 3.456 "market-state"])
     it "should raises exception when faces ill-formed json" $ do 
       evaluate (parseMarkets "[{\"name\":\"market-name\", \"x\":\"1234\", \"y\":3.456, \"state\":\"market-state\"}]" )`shouldThrow` anyException
+
+  describe "OrdList monoid" $ do
+    it "should maintains the ordering invariants" $ do
+      (OrdList [2,4,6]) <> (OrdList [1,3,5]) `shouldBe` OrdList [1,2,3,4,5,6]
