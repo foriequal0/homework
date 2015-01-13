@@ -65,3 +65,26 @@ instance Ord a => Monoid (OrdList a) where
              appendInOrder l@(x:xs) r@(y:ys)
                  | x <= y = x : (xs `appendInOrder`r)
                  | otherwise = y : (l `appendInOrder` ys)
+
+type Searcher m = T.Text -> [Market] -> m
+
+search :: Monoid m => (Market -> m) -> Searcher m
+search mkMonoid str mkt = 
+    mconcat $ map mkMonoid $ filter (T.isInfixOf str . marketname) $ mkt
+
+safeHead :: [a] -> Maybe a
+safehead [] = Nothing
+safeHead (x:_) = Just x
+
+firstFound :: Searcher (Maybe Market)
+firstFound = safeHead . search (:[])
+
+lastFound :: Searcher (Maybe Market)
+lastFound = safeHead . reverse . search (:[])
+
+allFound :: Searcher [Market]
+allFound = search (:[])
+
+numberFound :: Searcher Int
+numberFound = length . allFound
+
