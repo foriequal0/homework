@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric, OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric, OverloadedStrings, StandaloneDeriving #-}
 
 import Test.Hspec
 import Data.Aeson
@@ -9,7 +9,6 @@ import Data.List
 
 import HW06
 
---deriving instance Eq Market
 
 main :: IO()
 main = hspec $ do
@@ -38,7 +37,7 @@ main = hspec $ do
   describe "parseMarkets" $ do
     it "Can parse Market from JSON" $ do
       parseMarkets "[{\"marketname\":\"market-name\", \"x\":1.234, \"y\":3.456, \"state\":\"market-state\"}]" `shouldBe` Right ([Market "market-name" 1.234 3.456 "market-state"])
-    it "should raises exception when faces ill-formed json" $ do
+    it "should raise exception when facing ill-formed json" $ do
       evaluate (parseMarkets "[{\"name\":\"market-name\", \"x\":\"1234\", \"y\":3.456, \"state\":\"market-state\"}]" )`shouldThrow` anyException
     it "parse market successfully." $ do
       parseMarkets "[{\"marketname\": \"a\",\
@@ -54,3 +53,29 @@ main = hspec $ do
       let listMaker = (:[])
       let searcher = search listMaker "Farmers"
       searcher ioMarkets `shouldSatisfy` (isPrefixOf [Market {marketname = "\"Y Not Wednesday Farmers Market at Town Center\"", x = -76.13536, y = 36.841885, state = "Virginia"},Market {marketname = "10:10 Farmers Market", x = -84.7689, y = 33.7196, state = "Georgia"}])
+
+  describe "firstFound" $ do
+    it "should find first value" $ do
+      let ioMarkets = loadData
+      fmap (firstFound "Farmers") ioMarkets `shouldReturn` Just (Market {marketname = "\"Y Not Wednesday Farmers Market at Town Center\"", x = -76.13536, y = 36.841885, state = "Virginia"})
+    it "should return None when search fail" $ do
+      let ioMarkets = loadData
+      fmap (firstFound "emptyinput") ioMarkets `shouldReturn` Nothing
+
+  describe "lastFound" $ do
+    it "should find first value" $ do
+      let ioMarkets = loadData
+      fmap (lastFound "Farmers") ioMarkets `shouldReturn` Just (Market {marketname = "10:10 Farmers Market", x = -84.7689, y = 33.7196, state = "Georgia"})
+    it "should return None when search fail" $ do
+      let ioMarkets = loadData
+      fmap (lastFound "emptyinput") ioMarkets `shouldReturn` Nothing
+
+  describe "allFound" $ do
+    it "should found all values" $ do
+      let ioMarkets = loadData
+      fmap (allFound "Farmers") ioMarkets `shouldReturn` [Market {marketname = "\"Y Not Wednesday Farmers Market at Town Center\"", x = -76.13536, y = 36.841885, state = "Virginia"},Market {marketname = "10:10 Farmers Market", x = -84.7689, y = 33.7196, state = "Georgia"}]
+
+  describe "orderedNtoS" $ do
+    it "should search Famers correctly" $ do
+      let ioMarkets = loadData
+      fmap (orderedNtoS "Farmers") ioMarkets `shouldReturn` [Market {marketname = "10:10 Farmers Market", x = -84.7689, y = 33.7196, state = "Georgia"}, Market {marketname = "\"Y Not Wednesday Farmers Market at Town Center\"", x = -76.13536, y = 36.841885, state = "Virginia"}]
